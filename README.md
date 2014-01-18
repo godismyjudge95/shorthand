@@ -7,13 +7,14 @@ This extension is in a very initial state, every support is appreciated.
 
 If you select a rule like the one below and press CTRL + E
 
-    border: 1px solid black;
+    margin: 1px 2px 3px 4px;
     
 
 A Quick Edit panel will be opened, with the same rule expanded in the singular specific properties:
 
-    border-width: 1px;
-    border-style: solid;
-    border-color: black;
+    margin-top: 1px;
+    margin-right: 2px;
+    margin-bottom: 3px;
+    margin-left: 4px;
    
 Here you will be able to edit the values of the properties and when you will close the Quick Edit, the rules will be condensed back to the short hand.
