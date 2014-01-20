@@ -24,17 +24,18 @@
 
 
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, brackets, $ */
+/*global define, brackets, $, less */
 
 define(function (require, exports, module) {
     "use strict";
     
     // Brackets modules
     var CSSUtils                = brackets.getModule("language/CSSUtils"),
-        DocumentManager         = brackets.getModule("document/DocumentManager"),
-        EditorManager           = brackets.getModule("editor/EditorManager"),
-        JSUtils                 = brackets.getModule("language/JSUtils"),
-        ProjectManager          = brackets.getModule("project/ProjectManager");
+        EditorManager           = brackets.getModule("editor/EditorManager");
+
+    // Shorthand Providers
+    var providerMargin          = require("providers/margin"),
+        ShorthandManager        = require("ShorthandManager");
 
     var InlineShorthandEditor   = require("InlineShorthandEditor").InlineShorthandEditor;
 
@@ -42,32 +43,38 @@ define(function (require, exports, module) {
      * @private
      * For unit and performance tests. Allows lookup by function name instead of editor offset .
      *
-     * @param {!Editor} hostEditor
-     * @param {!string} shorthandPropertyName
+     * @param {Editor} hostEditor
+     * @param {Bookmark} startBookmark
+     * @param {Bookmark} endBookmark
+     * @param {RegExpMatch} shorthand declaration
      * @return {$.Promise} a promise that will be resolved with an InlineWidget
      *      or null if we're not going to provide anything.
      */
-    function _createInlineEditor(hostEditor, startBookmark, endBookmark, text) {
+    function _createInlineEditor(hostEditor, startBookmark, endBookmark, match) {
 
         var result = new $.Deferred(),
-            shorthandInlineEditor = new InlineShorthandEditor(text);
+            shorthandInlineEditor = new InlineShorthandEditor(match),
+            code = match[0];
+
+        ShorthandManager.parseDeclarationList(code)
+            .done(function (declList) {
+                shorthandInlineEditor.load(hostEditor, startBookmark, endBookmark, declList);
+                result.resolve(shorthandInlineEditor);
+            });
         
-        shorthandInlineEditor.load(hostEditor, startBookmark, endBookmark);
-
-        result.resolve(shorthandInlineEditor);
-
         return result.promise();
     }
     
     /**
      * Match a css shorthand property from a line of css.
      *
+     * @param {string} property name.
      * @param {string} str  Input string.
      * @return {!RegExpMatch}
      */
-    function shorthandMatch(str) {
-        // FORNOW - match "margin" shorthand declaration. This should be done in convert.js
-        return str.match(/(margin)\s*:([A-Za-z0-9\s\-]+);/);
+    function shorthandMatch(prop, str) {
+        var regex = "(" + prop + ")\\s*:([\\w\\s\\-]+);";
+        return str.match(regex);
     }
     
     /**
@@ -82,6 +89,7 @@ define(function (require, exports, module) {
      */
     function cssShorthandPropertyProvider(hostEditor, pos) {
         var cursorLine, sel, startPos, endPos, startBookmark, endBookmark, currentMatch,
+            shorthandProvider,
             cm = hostEditor._codeMirror;
 
         // Only provide a shorthand editor when cursor is in css content
@@ -96,9 +104,14 @@ define(function (require, exports, module) {
             return null;
         }
 
+        shorthandProvider = ShorthandManager.getProviderForProperty(cssInfo.name);
+        if (!shorthandProvider) {
+            return null;
+        }
+
         cursorLine = hostEditor.document.getLine(pos.line);
         
-        currentMatch = shorthandMatch(cursorLine);
+        currentMatch = shorthandMatch(cssInfo.name, cursorLine);
         if (!currentMatch) {
             return null;
         }
@@ -107,7 +120,7 @@ define(function (require, exports, module) {
         var lineOffset = 0;
         while (pos.ch > (currentMatch.index + currentMatch[0].length + lineOffset)) {
             var restOfLine = cursorLine.substring(currentMatch.index + currentMatch[0].length + lineOffset),
-                newMatch = shorthandMatch(restOfLine);
+                newMatch = shorthandMatch(cssInfo.name, restOfLine);
 
             if (newMatch) {
                 lineOffset += (currentMatch.index + currentMatch[0].length);
@@ -129,7 +142,7 @@ define(function (require, exports, module) {
         // get dismissed while we're updating the timing function.
         hostEditor.setSelection(startPos, endPos);
 
-        return _createInlineEditor(hostEditor, startBookmark, endBookmark, currentMatch[0]);
+        return _createInlineEditor(hostEditor, startBookmark, endBookmark, currentMatch);
     }
 
     // init

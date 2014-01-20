@@ -44,22 +44,24 @@ define(function (require, exports, module) {
         InMemoryFile        = brackets.getModule("document/InMemoryFile"),
         _                   = brackets.getModule("thirdparty/lodash");
     
+    var ShorthandManager    = require("ShorthandManager");
+
     var shorthandEditorTemplate    = require("text!shorthand-editor-template.html");
-    
+
     /**
      * @constructor
+     * @param {CSSinfo} cssInfo The provider for this shorthand property
      * @param {string} text The shorthand declaration
      * @extends {InlineWidget}
      */
-    function InlineShorthandEditor(text) {
+    function InlineShorthandEditor(match) {
         var self = this;
-        
+
         InlineWidget.call(this);
 
-// TODO - convert text to longhand
-        
-        this.text = text;
-        this.counter = 1;
+        this.shorthandText = match[0];
+        this.propName = match[1];
+        this.provider = ShorthandManager.getProviderForProperty(match[1]);
 
         $(DocumentManager).on("dirtyFlagChange", function (event, doc) {
             if (doc === self.doc) {
@@ -73,9 +75,9 @@ define(function (require, exports, module) {
     InlineShorthandEditor.prototype.constructor = InlineShorthandEditor;
     InlineShorthandEditor.prototype.parentClass = InlineWidget.prototype;
     
+    InlineShorthandEditor.prototype.provider = null;
     InlineShorthandEditor.prototype.text = null;
     InlineShorthandEditor.prototype.doc = null;
-    InlineShorthandEditor.prototype.counter = 1;
     InlineShorthandEditor.prototype.editor = null;
     InlineShorthandEditor.prototype.startBookmark = null;
     InlineShorthandEditor.prototype.endBookmark = null;
@@ -86,7 +88,7 @@ define(function (require, exports, module) {
      * @override
      * @param {!Editor} hostEditor  Outer Editor instance that inline editor will sit within.
      */
-    InlineShorthandEditor.prototype.load = function (hostEditor, startBookmark, endBookmark) {
+    InlineShorthandEditor.prototype.load = function (hostEditor, startBookmark, endBookmark, tree) {
         InlineShorthandEditor.prototype.parentClass.load.apply(this, arguments);
         
         // FUTURE: when we migrate to CodeMirror v3, we might be able to use markText()
@@ -112,11 +114,18 @@ define(function (require, exports, module) {
         
         var self = this;
         
-        // Create an in-memory document with text
-        var filename = "temp-longhand-" + (this.counter++) + ".css",
+        // Convert shorthand declaration to longhand declaration list
+        if (this.provider) {
+            this.longhandText = ShorthandManager.unparseDeclarationList(
+                this.provider.convertShorthandToLonghand(tree.rules[0])
+            );
+        }
+
+        // Create an in-memory document with longhand text
+        var filename = "temp-longhand.css",
             file = new InMemoryFile(filename, FileSystem);
         
-        this.doc = new DocumentModule.Document(file, (new Date()), this.text);
+        this.doc = new DocumentModule.Document(file, (new Date()), this.longhandText);
 
         var inlineContent = this.$editorHolder.get(0);
         
@@ -201,7 +210,10 @@ define(function (require, exports, module) {
         
         // de-ref the Document
         this.doc = null;
-        this.text = null;
+        this.shorthandText = null;
+        this.longhandText = null;
+        this.provider = null;
+        this.propName = null;
 
         // Remove event handlers
         this.$htmlContent.off(".InlineShorthandEditor");
@@ -219,8 +231,17 @@ define(function (require, exports, module) {
             start   = this.startBookmark.find(),
             end     = this.endBookmark.find();
         
-        if (newText !== this.text && start && end) {
-            this.hostEditor.document.replaceRange(newText, start, end);
+        if (newText !== this.longhandText && start && end && this.provider) {
+            var self = this;
+
+            ShorthandManager.parseDeclarationList(newText)
+                .done(function (declList) {
+                    var shorthandText = ShorthandManager.unparseDeclarationList(
+                        [ self.provider.convertLonghandToShorthand(declList.rules) ]
+                    );
+
+                    self.hostEditor.document.replaceRange(shorthandText, start, end);
+                });
         }
 
         this.close();
