@@ -36,7 +36,18 @@ define(function (require, exports, module) {
     
     var ShorthandManager        = require("ShorthandManager");
 
-    // Helper functions
+
+    // Provider Prototypes
+
+    /**
+     * @constructor
+     * Object for converting CSS margin shorthand property to longhand, and back to shorthand.
+     */
+    function ProviderTRBL(propName) {
+        this.propName = propName;
+    }
+
+    ProviderTRBL.prototype.propName = "";
 
     /**
      * Converts a CSS TRBL shorthand declaration to a longhand declaration list.
@@ -48,8 +59,8 @@ define(function (require, exports, module) {
      * @ param {name: {string}, value.value[0].value: {Array<{string}>}} decl CSS shorthand declaration
      * @return {Array<{name:{string}, value.value[0].value:{Array<{string}}}>}
      */
-    function convertShorthandToLonghand(propName, decl) {
-        if (decl.name !== propName) {
+    ProviderTRBL.prototype.convertShorthandToLonghand = function (decl) {
+        if (decl.name !== this.propName) {
             return null;
         }
 
@@ -58,12 +69,12 @@ define(function (require, exports, module) {
         );
         
         return [
-            { name: propName + "-top",    value: { value: [ { value: longhandVals[0] } ] } },
-            { name: propName + "-right",  value: { value: [ { value: longhandVals[1] } ] } },
-            { name: propName + "-bottom", value: { value: [ { value: longhandVals[2] } ] } },
-            { name: propName + "-left",   value: { value: [ { value: longhandVals[3] } ] } }
+            { name: this.propName + "-top",    value: { value: [ { value: longhandVals[0] } ] } },
+            { name: this.propName + "-right",  value: { value: [ { value: longhandVals[1] } ] } },
+            { name: this.propName + "-bottom", value: { value: [ { value: longhandVals[2] } ] } },
+            { name: this.propName + "-left",   value: { value: [ { value: longhandVals[3] } ] } }
         ];
-    }
+    };
 
     /**
      * Converts a CSS margin longhand declaration list to a shorthand declaration.
@@ -75,7 +86,7 @@ define(function (require, exports, module) {
      * @ param {Array<{name: {string}, value.value[0].value: {string}}>} decl CSS shorthand declaration
      * @return {name:{string}, value.value[0].value:{string}}
      */
-    function convertLonghandToShorthand(propName, declList) {
+    ProviderTRBL.prototype.convertLonghandToShorthand = function (declList) {
         var decl,
             shorthandVals = [];
 
@@ -83,89 +94,44 @@ define(function (require, exports, module) {
             return null;
         }
 
-        decl = ShorthandManager.findPropInDecList(propName + "-top", declList);
+        decl = ShorthandManager.findPropInDecList(this.propName + "-top", declList);
         if (!decl) {
             return null;
         }
         shorthandVals.push(decl.value.value[0].value);
 
-        decl = ShorthandManager.findPropInDecList(propName + "-right", declList);
+        decl = ShorthandManager.findPropInDecList(this.propName + "-right", declList);
         if (!decl) {
             return null;
         }
         shorthandVals.push(decl.value.value[0].value);
 
-        decl = ShorthandManager.findPropInDecList(propName + "-bottom", declList);
+        decl = ShorthandManager.findPropInDecList(this.propName + "-bottom", declList);
         if (!decl) {
             return null;
         }
         shorthandVals.push(decl.value.value[0].value);
 
-        decl = ShorthandManager.findPropInDecList(propName + "-left", declList);
+        decl = ShorthandManager.findPropInDecList(this.propName + "-left", declList);
         if (!decl) {
             return null;
         }
         shorthandVals.push(decl.value.value[0].value);
 
         return {
-            name: propName,
+            name: this.propName,
             value: {
                 value: [
                     { value: ShorthandManager.collapseTRBLValues(shorthandVals).join(" ") }
                 ]
             }
         };
-    }
-
-
-    // Provider Prototypes
-
-    /**
-     * @constructor
-     * Object for converting CSS margin shorthand property to longhand, and back to shorthand.
-     */
-    function ProviderMargin() {
-    }
-
-    /**
-     * See function convertShorthandToLonghand(propName, decl)
-     */
-    ProviderMargin.prototype.convertShorthandToLonghand = function (decl) {
-        return convertShorthandToLonghand("margin", decl);
-    };
-
-    /**
-     * See function convertLonghandToShorthand(propName, declList)
-     */
-    ProviderMargin.prototype.convertLonghandToShorthand = function (declList) {
-        return convertLonghandToShorthand("margin", declList);
-    };
-
-    /**
-     * @constructor
-     * Object for converting CSS margin shorthand property to longhand, and back to shorthand.
-     */
-    function ProviderPadding() {
-    }
-
-    /**
-     * See function convertShorthandToLonghand(propName, decl)
-     */
-    ProviderPadding.prototype.convertShorthandToLonghand = function (decl) {
-        return convertShorthandToLonghand("padding", decl);
-    };
-
-    /**
-     * See function convertLonghandToShorthand(propName, declList)
-     */
-    ProviderPadding.prototype.convertLonghandToShorthand = function (declList) {
-        return convertLonghandToShorthand("padding", declList);
     };
 
     // Initialize
-    var providerMargin = new ProviderMargin();
+    var providerMargin = new ProviderTRBL("margin");
     ShorthandManager.registerShorthandProvider("margin", providerMargin);
 
-    var providerPadding = new ProviderPadding();
+    var providerPadding = new ProviderTRBL("padding");
     ShorthandManager.registerShorthandProvider("padding", providerPadding);
 });
