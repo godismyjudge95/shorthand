@@ -34,10 +34,11 @@ define(function (require, exports, module) {
         EditorManager           = brackets.getModule("editor/EditorManager");
 
     // Shorthand Providers
-    var providerMargin          = require("providers/margin"),
-        ShorthandManager        = require("ShorthandManager");
+    var ShorthandManager        = require("ShorthandManager"),
+        InlineShorthandEditor   = require("InlineShorthandEditor").InlineShorthandEditor;
 
-    var InlineShorthandEditor   = require("InlineShorthandEditor").InlineShorthandEditor;
+    // Load providers
+    require("providers/trbl");
 
     /**
      * @private
