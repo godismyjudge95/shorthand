@@ -24,7 +24,7 @@
 /*
  * This provider handles css shorthand properties in top-right-bottom-left (trbl) format.
  *
- * Unfortunately, this pattern does not wotk with: border-width shorthand because longhand
+ * Unfortunately, this pattern does not work with: border-width shorthand because longhand
  * values are border-[side]-width (as opposed to border-width-[side]).
  */
 
