@@ -18,3 +18,8 @@ A Quick Edit panel will be opened, with the same rule expanded in the singular s
     margin-left: 4px;
    
 Here you will be able to edit the values of the properties and when you will close the Quick Edit, the rules will be condensed back to the short hand.
+
+
+
+## Contribute
+Please feel free to contribute to this project! Besides editing the main code you can also help by adding more shorthand providers. Here is a quick tutorial: [How to Create a Shorthand Provider]( https://github.com/LeinardoSmith/shorthand/wiki/How-to-Create-a-Shorthand-Provider)
