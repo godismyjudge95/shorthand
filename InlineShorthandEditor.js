@@ -240,6 +240,12 @@ define(function (require, exports, module) {
                         [ self.provider.convertLonghandToShorthand(declList.rules) ]
                     );
 
+                    // unparseDeclarationList() generates whole lines, which is great
+                    // for generating longhand for editor, but when replacing original
+                    // text in doc, we need to strip trailing newline because original
+                    // text doesn't have newline.
+                    shorthandText = shorthandText.replace(/\n$/, "");
+
                     self.hostEditor.document.replaceRange(shorthandText, start, end);
                 });
         }

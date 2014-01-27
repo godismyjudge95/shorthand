@@ -21,7 +21,12 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * 
  */
-
+/*
+ * This provider handles css shorthand properties in top-right-bottom-left (trbl) format.
+ *
+ * Unfortunately, this pattern does not work with: border-width shorthand because longhand
+ * values are border-[side]-width (as opposed to border-width-[side]).
+ */
 
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
 /*global define, brackets, $ */
@@ -31,15 +36,21 @@ define(function (require, exports, module) {
     
     var ShorthandManager        = require("ShorthandManager");
 
+
+    // Provider Prototypes
+
     /**
      * @constructor
      * Object for converting CSS margin shorthand property to longhand, and back to shorthand.
      */
-    function ProviderMargin() {
+    function ProviderTRBL(propName) {
+        this.propName = propName;
     }
 
+    ProviderTRBL.prototype.propName = "";
+
     /**
-     * Converts a CSS margin shorthand declaration to a longhand declaration list.
+     * Converts a CSS TRBL shorthand declaration to a longhand declaration list.
      *
      * If input cannot be converted, then null is returned.
      *
@@ -48,8 +59,8 @@ define(function (require, exports, module) {
      * @ param {name: {string}, value.value[0].value: {Array<{string}>}} decl CSS shorthand declaration
      * @return {Array<{name:{string}, value.value[0].value:{Array<{string}}}>}
      */
-    ProviderMargin.prototype.convertShorthandToLonghand = function (decl) {
-        if (decl.name !== "margin") {
+    ProviderTRBL.prototype.convertShorthandToLonghand = function (decl) {
+        if (decl.name !== this.propName) {
             return null;
         }
 
@@ -58,10 +69,10 @@ define(function (require, exports, module) {
         );
         
         return [
-            { name: "margin-top",    value: { value: [ { value: longhandVals[0] } ] } },
-            { name: "margin-right",  value: { value: [ { value: longhandVals[1] } ] } },
-            { name: "margin-bottom", value: { value: [ { value: longhandVals[2] } ] } },
-            { name: "margin-left",   value: { value: [ { value: longhandVals[3] } ] } }
+            { name: this.propName + "-top",    value: { value: [ { value: longhandVals[0] } ] } },
+            { name: this.propName + "-right",  value: { value: [ { value: longhandVals[1] } ] } },
+            { name: this.propName + "-bottom", value: { value: [ { value: longhandVals[2] } ] } },
+            { name: this.propName + "-left",   value: { value: [ { value: longhandVals[3] } ] } }
         ];
     };
 
@@ -75,7 +86,7 @@ define(function (require, exports, module) {
      * @ param {Array<{name: {string}, value.value[0].value: {string}}>} decl CSS shorthand declaration
      * @return {name:{string}, value.value[0].value:{string}}
      */
-    ProviderMargin.prototype.convertLonghandToShorthand = function (declList) {
+    ProviderTRBL.prototype.convertLonghandToShorthand = function (declList) {
         var decl,
             shorthandVals = [];
 
@@ -83,32 +94,32 @@ define(function (require, exports, module) {
             return null;
         }
 
-        decl = ShorthandManager.findPropInDecList("margin-top", declList);
+        decl = ShorthandManager.findPropInDecList(this.propName + "-top", declList);
         if (!decl) {
             return null;
         }
         shorthandVals.push(decl.value.value[0].value);
 
-        decl = ShorthandManager.findPropInDecList("margin-right", declList);
+        decl = ShorthandManager.findPropInDecList(this.propName + "-right", declList);
         if (!decl) {
             return null;
         }
         shorthandVals.push(decl.value.value[0].value);
 
-        decl = ShorthandManager.findPropInDecList("margin-bottom", declList);
+        decl = ShorthandManager.findPropInDecList(this.propName + "-bottom", declList);
         if (!decl) {
             return null;
         }
         shorthandVals.push(decl.value.value[0].value);
 
-        decl = ShorthandManager.findPropInDecList("margin-left", declList);
+        decl = ShorthandManager.findPropInDecList(this.propName + "-left", declList);
         if (!decl) {
             return null;
         }
         shorthandVals.push(decl.value.value[0].value);
 
         return {
-            name: "margin",
+            name: this.propName,
             value: {
                 value: [
                     { value: ShorthandManager.collapseTRBLValues(shorthandVals).join(" ") }
@@ -118,6 +129,9 @@ define(function (require, exports, module) {
     };
 
     // Initialize
-    var providerMargin = new ProviderMargin();
+    var providerMargin = new ProviderTRBL("margin");
     ShorthandManager.registerShorthandProvider("margin", providerMargin);
+
+    var providerPadding = new ProviderTRBL("padding");
+    ShorthandManager.registerShorthandProvider("padding", providerPadding);
 });
