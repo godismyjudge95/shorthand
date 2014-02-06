@@ -67,7 +67,7 @@ define(function (require, exports, module) {
             { name: this.propName + "-attachment",   value: { value: [ { value: longhandVals[4] } ] } },
             { name: this.propName + "-origin",   value: { value: [ { value: longhandVals[5] } ] } },
             { name: this.propName + "-clip",   value: { value: [ { value: longhandVals[6] } ] } },
-            { name: this.propName + "-color",   value: { value: [ { value: longhandVals[7] } ] } },
+            { name: this.propName + "-color",   value: { value: [ { value: longhandVals[7] } ] } }
         ];
     };
 
@@ -82,7 +82,6 @@ define(function (require, exports, module) {
      * @return {name:{string}, value.value[0].value:{string}}
      */
     ProviderBG.prototype.convertLonghandToShorthand = function (declList) {
-            console.log(declList);
         var decl,
             shorthandVals = [];
 
@@ -145,7 +144,7 @@ define(function (require, exports, module) {
                     { value: ShorthandManager.collapseValues(shorthandVals).join(" ") }
                 ]
             }
-        }
+        };
     };
 
     // Initialize
