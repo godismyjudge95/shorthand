@@ -83,7 +83,7 @@ define(function (require, exports, module) {
      * @return {Array<{string}>} vals Array with 1 - 8 values
      */
     function expandValues(vals) {
-        var $test = $('<span />');
+        var $test = $('<div />');
         vals = vals.isArray ? vals.join(' ') : vals;
         $test.css('background', vals);
         
@@ -95,7 +95,7 @@ define(function (require, exports, module) {
             $test.css('backgroundRepeat') === "" ? "initial" : $test.css("backgroundRepeat"),
             $test.css('backgroundAttachment') === "" ? "initial" : $test.css("backgroundAttachment"),
             $test.css('backgroundOrigin') === "" ? "initial" : $test.css("backgroundOrigin"),
-            $test.css('backgroundCip') === "" ? "initial" : $test.css("backgroundClip"),
+            $test.css('backgroundClip') === "" ? "initial" : $test.css("backgroundClip"),
             $test.css('backgroundColor') === "" ? "initial" : $test.css("backgroundColor")
         ];
     }
@@ -117,7 +117,7 @@ define(function (require, exports, module) {
             $test.css('backgroundRepeat') === "" ? "initial" : $test.css("backgroundRepeat"),
             $test.css('backgroundAttachment') === "" ? "initial" : $test.css("backgroundAttachment"),
             $test.css('backgroundOrigin') === "" ? "initial" : $test.css("backgroundOrigin"),
-            $test.css('backgroundCip') === "" ? "initial" : $test.css("backgroundClip"),
+            $test.css('backgroundClip') === "" ? "initial" : $test.css("backgroundClip"),
             $test.css('backgroundColor') === "" ? "initial" : $test.css("backgroundColor")
         ];
     }
