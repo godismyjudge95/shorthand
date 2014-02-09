@@ -77,50 +77,6 @@ define(function (require, exports, module) {
         }
         return ret;
     }
-    
-    /**
-     * @param {Array<{string}>} vals Array with 8 values
-     * @return {Array<{string}>} vals Array with 1 - 8 values
-     */
-    function expandValues(vals) {
-        var $test = $('<div />');
-        vals = vals.isArray ? vals.join(' ') : vals;
-        $test.css('background', vals);
-        
-        
-        return [
-            $test.css('backgroundImage') === "" ? "initial" : $test.css('backgroundImage'),
-            $test.css('backgroundPosition') === "" ? "initial" : $test.css('backgroundPosition'),
-            $test.css('backgroundSize') === "" ? "initial" : $test.css("backgroundSize"),
-            $test.css('backgroundRepeat') === "" ? "initial" : $test.css("backgroundRepeat"),
-            $test.css('backgroundAttachment') === "" ? "initial" : $test.css("backgroundAttachment"),
-            $test.css('backgroundOrigin') === "" ? "initial" : $test.css("backgroundOrigin"),
-            $test.css('backgroundClip') === "" ? "initial" : $test.css("backgroundClip"),
-            $test.css('backgroundColor') === "" ? "initial" : $test.css("backgroundColor")
-        ];
-    }
-    
-    /**
-     * @param {Array<{string}>} vals Array with 8 values
-     * @return {Array<{string}>} vals Array with 1 - 8 values
-     */
-    function collapseValues(vals) {
-        var $test = $('<span />');
-        vals = vals.isArray ? vals.join(' ') : vals;
-        $test.css('background', vals);
-        
-        
-        return [
-            $test.css('backgroundImage') === "" ? "initial" : $test.css('backgroundImage'),
-            $test.css('backgroundPosition') === "" ? "initial" : $test.css('backgroundPosition'),
-            $test.css('backgroundSize') === "" ? "initial" : $test.css("backgroundSize"),
-            $test.css('backgroundRepeat') === "" ? "initial" : $test.css("backgroundRepeat"),
-            $test.css('backgroundAttachment') === "" ? "initial" : $test.css("backgroundAttachment"),
-            $test.css('backgroundOrigin') === "" ? "initial" : $test.css("backgroundOrigin"),
-            $test.css('backgroundClip') === "" ? "initial" : $test.css("backgroundClip"),
-            $test.css('backgroundColor') === "" ? "initial" : $test.css("backgroundColor")
-        ];
-    }
 
     /**
      * @param {string} propName
@@ -162,9 +118,11 @@ define(function (require, exports, module) {
      */
     function unparseDeclarationList(declList) {
         var i, text = "";
-
         declList.forEach(function (decl) {
-            text += decl.name + ": " + decl.value.value[0].value + ";\n";
+            var def = decl.value.value[0].value;
+            //If the values are still in object form, then go deeper, otherwise set them to def
+            var val = def === Object(def) ? decl.value.value[0].value[0].value : def;
+            text += decl.name + ": " + val + ";\n";
         });
 
         return text;
@@ -195,7 +153,6 @@ define(function (require, exports, module) {
     // Utility functions
     exports.expandTRBLValues            = expandTRBLValues;
     exports.collapseTRBLValues          = collapseTRBLValues;
-    exports.expandValues            = expandValues;
     exports.collapseValues          = collapseValues;
     exports.findPropInDecList           = findPropInDecList;
     exports.parseDeclarationList        = parseDeclarationList;
