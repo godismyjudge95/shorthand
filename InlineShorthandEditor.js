@@ -117,7 +117,7 @@ define(function (require, exports, module) {
         // Convert shorthand declaration to longhand declaration list
         if (this.provider) {
             this.longhandText = ShorthandManager.unparseDeclarationList(
-                this.provider.convertShorthandToLonghand(tree.rules[0])
+                this.provider.convertShorthandToLonghand(tree.isArray ? tree.rules[0] : tree)
             );
         }
 
@@ -236,9 +236,9 @@ define(function (require, exports, module) {
 
             ShorthandManager.parseDeclarationList(newText)
                 .done(function (declList) {
-                    var shorthandText = ShorthandManager.unparseDeclarationList(
-                        [ self.provider.convertLonghandToShorthand(declList.rules) ]
-                    );
+                    var text = self.provider.convertLonghandToShorthand(declList.rules);
+                    //If the values are in an array then unparse them otherwise set them equal to text
+                    var shorthandText = text.isArray ? ShorthandManager.unparseDeclarationList([ text ]) : text;
 
                     // unparseDeclarationList() generates whole lines, which is great
                     // for generating longhand for editor, but when replacing original
