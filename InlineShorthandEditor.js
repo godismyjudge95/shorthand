@@ -117,6 +117,7 @@ define(function (require, exports, module) {
         // Convert shorthand declaration to longhand declaration list
         if (this.provider) {
             this.longhandText = ShorthandManager.unparseDeclarationList(
+                //If the values are in an array go deeper otherwise set them equal to tree
                 this.provider.convertShorthandToLonghand(tree.isArray ? tree.rules[0] : tree)
             );
         }
