@@ -60,6 +60,7 @@ define(function (require, exports, module) {
 
         ShorthandManager.parseDeclarationList(code)
             .done(function (declList) {
+                declList = code.split(": ")[1].split(";")[0];
                 shorthandInlineEditor.load(hostEditor, startBookmark, endBookmark, declList);
                 result.resolve(shorthandInlineEditor);
             });
