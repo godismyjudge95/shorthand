@@ -51,41 +51,41 @@ define(function (require, exports, module) {
      *
      * If input cannot be converted, then null is returned.
      *
-     * AST format is from LESS parser.
-     *
-     * @ param {name: {string}, value.value[0].value: {Array<{string}>}} decl CSS shorthand declaration
-     * @return {Array<{name:{string}, value.value[0].value:{Array<{string}}}>}
+     * @ param {prop: {string}, val: {string}} decl CSS shorthand declaration
+     * @return {Array<{prop:{string}, val:{string}}>}
      */
     ProviderBG.prototype.convertShorthandToLonghand = function (decl) {
-        //If the values are in an array then retrieve them otherwise set them equal to decl
-        var vals = decl.isArray ? decl.value.value[0].value : decl;
-        //Create a jQuery temp div
-        var $test = $('<div />');
-        //If the css values are in an array then convert them to a string separated by spaces (preparing for jQuery)
-        vals = vals.isArray ? vals.join(' ') : vals;
-        //Apply the shorthand css values to the jQuery temp div
-        $test.css('background', vals);
-        //Use the jQuery temp div to get each of the longhand values if it is empty then set the default to "initial"
-        var longhandVals = [
-            $test.css('backgroundImage') === "" ? "initial" : $test.css('backgroundImage'),
-            $test.css('backgroundPosition') === "" ? "initial" : $test.css('backgroundPosition'),
-            $test.css('backgroundSize') === "" ? "initial" : $test.css("backgroundSize"),
-            $test.css('backgroundRepeat') === "" ? "initial" : $test.css("backgroundRepeat"),
-            $test.css('backgroundAttachment') === "" ? "initial" : $test.css("backgroundAttachment"),
-            $test.css('backgroundOrigin') === "" ? "initial" : $test.css("backgroundOrigin"),
-            $test.css('backgroundClip') === "" ? "initial" : $test.css("backgroundClip"),
-            $test.css('backgroundColor') === "" ? "initial" : $test.css("backgroundColor")
-        ];
-        //Return each of the longhand values
+        var longhandVals = ShorthandManager.convertProps(
+            [ decl ],
+            [
+                "backgroundImage",
+                "backgroundPosition",
+                "backgroundSize",
+                "backgroundRepeat",
+                "backgroundAttachment",
+                "backgroundOrigin",
+                "backgroundClip",
+                "backgroundColor"
+            ]
+        );
+
+        // If values is empty, then set the default to "initial"
+        longhandVals.forEach(function (val, index) {
+            if (val === "") {
+                longhandVals[index] = "initial";
+            }
+        });
+
+        // Return each of the longhand values
         return [
-            { name: this.propName + "-image",    value: { value: [ { value: longhandVals[0] } ] } },
-            { name: this.propName + "-position",  value: { value: [ { value: longhandVals[1] } ] } },
-            { name: this.propName + "-size", value: { value: [ { value: longhandVals[2] } ] } },
-            { name: this.propName + "-repeat",   value: { value: [ { value: longhandVals[3] } ] } },
-            { name: this.propName + "-attachment",   value: { value: [ { value: longhandVals[4] } ] } },
-            { name: this.propName + "-origin",   value: { value: [ { value: longhandVals[5] } ] } },
-            { name: this.propName + "-clip",   value: { value: [ { value: longhandVals[6] } ] } },
-            { name: this.propName + "-color",   value: { value: [ { value: longhandVals[7] } ] } }
+            { prop: this.propName + "-image",      val: longhandVals[0] },
+            { prop: this.propName + "-position",   val: longhandVals[1] },
+            { prop: this.propName + "-size",       val: longhandVals[2] },
+            { prop: this.propName + "-repeat",     val: longhandVals[3] },
+            { prop: this.propName + "-attachment", val: longhandVals[4] },
+            { prop: this.propName + "-origin",     val: longhandVals[5] },
+            { prop: this.propName + "-clip",       val: longhandVals[6] },
+            { prop: this.propName + "-color",      val: longhandVals[7] }
         ];
     };
 
@@ -94,30 +94,27 @@ define(function (require, exports, module) {
      *
      * If input cannot be converted, then null is returned.
      *
-     * AST format is from LESS parser.
-     *
-     * @ param {Array<{name: {string}, value.value[0].value: {string}}>} decl CSS shorthand declaration
-     * @return {name:{string}, value.value[0].value:{string}}
+     * @ param {Array<{prop: {string}, val: {string}}>} decl CSS longhand declarations
+     * @return {prop:{string}, val:{string}}
      */
     ProviderBG.prototype.convertLonghandToShorthand = function (declList) {
-        var decl,
-            shorthandVals = [];
-        //Unparse the css values
-        var vals = ShorthandManager.unparseDeclarationList(declList);
-        //Remove the properties that have not been changed and have the "initial" value
-        vals = vals.replace(/.*:\sinitial;\n/g, '');
-        //Format the css values to make them ready for jQuery (put them in "property": "value" form)
-        vals = vals.replace(/(.*):\s(.*);\n/g, '"$1":"$2", ');
-        //Remove the last comma
-        vals = vals.replace(/,([^,]*)$/,'$1');
-        //Create the jQuery temp div tag
-        var $test = $('<div />');
-        //Convert the css values to object form and apply them to the jQuery temp div tag
-        $test.css(JSON.parse("{"+vals+"}"));
-        //Get the shorthand background and format them for replacement in the editor
-        vals = 'background: ' + $test.css('background') + ';';
-        //Return the final shorthand background property
-        return vals;
+        var shorthandVals,
+            activeDeclList = [];
+
+        // Remove the properties that have not been changed and have the "initial" value
+        declList.forEach(function (decl, index) {
+            if (decl.val !== "initial") {
+                activeDeclList.push(decl);
+            }
+        });
+
+        shorthandVals = ShorthandManager.convertProps(
+            activeDeclList,
+            [ this.propName ]
+        );
+
+        // Return shorthand declaration
+        return { prop: this.propName, val: shorthandVals[0] };
     };
 
     // Initialize

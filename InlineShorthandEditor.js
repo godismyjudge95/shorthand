@@ -88,7 +88,7 @@ define(function (require, exports, module) {
      * @override
      * @param {!Editor} hostEditor  Outer Editor instance that inline editor will sit within.
      */
-    InlineShorthandEditor.prototype.load = function (hostEditor, startBookmark, endBookmark, tree) {
+    InlineShorthandEditor.prototype.load = function (hostEditor, startBookmark, endBookmark, decl) {
         InlineShorthandEditor.prototype.parentClass.load.apply(this, arguments);
         
         // FUTURE: when we migrate to CodeMirror v3, we might be able to use markText()
@@ -117,8 +117,7 @@ define(function (require, exports, module) {
         // Convert shorthand declaration to longhand declaration list
         if (this.provider) {
             this.longhandText = ShorthandManager.unparseDeclarationList(
-                //If the values are in an array go deeper otherwise set them equal to tree
-                this.provider.convertShorthandToLonghand(tree.isArray ? tree.rules[0] : tree)
+                this.provider.convertShorthandToLonghand(decl)
             );
         }
 
@@ -235,20 +234,18 @@ define(function (require, exports, module) {
         if (newText !== this.longhandText && start && end && this.provider) {
             var self = this;
 
-            ShorthandManager.parseDeclarationList(newText)
-                .done(function (declList) {
-                    var text = self.provider.convertLonghandToShorthand(declList.rules);
-                    //If the values are in an array then unparse them otherwise set them equal to text
-                    var shorthandText = text.isArray ? ShorthandManager.unparseDeclarationList([ text ]) : text;
+            var longhandDeclList = ShorthandManager.parseDeclarationList(newText),
+                shorthandDecl = self.provider.convertLonghandToShorthand(longhandDeclList),
+                shorthandDeclList = [ shorthandDecl ],
+                shorthandText = ShorthandManager.unparseDeclarationList(shorthandDeclList);
 
-                    // unparseDeclarationList() generates whole lines, which is great
-                    // for generating longhand for editor, but when replacing original
-                    // text in doc, we need to strip trailing newline because original
-                    // text doesn't have newline.
-                    shorthandText = shorthandText.replace(/\n$/, "");
+            // unparseDeclarationList() generates whole lines, which is great
+            // for generating longhand for editor, but when replacing original
+            // text in doc, we need to strip trailing newline because original
+            // text doesn't have newline.
+            shorthandText = shorthandText.replace(/\n$/, "");
 
-                    self.hostEditor.document.replaceRange(shorthandText, start, end);
-                });
+            self.hostEditor.document.replaceRange(shorthandText, start, end);
         }
 
         this.close();
