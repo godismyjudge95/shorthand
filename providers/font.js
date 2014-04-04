@@ -94,18 +94,21 @@ define(function (require, exports, module) {
         var shorthandVals = "", decl = "", longhandVals;
         
         declList.forEach(function(val, i) {
-            decl += i === 4 ? "/ " : "";
-            decl += val.val;
-            decl += i < 6 ? " " : "";
+            if (val.val !== undefined) {
+                decl += i === 4 ? "/ " : "";
+                decl += val.val;
+                decl += i < 6 ? " " : "";
+            }
         });
         
-        longhandVals = decl.match(/(?:(?:\s*(normal|italic|oblique|initial|inherit))?(?:\s+(normal|small-caps|initial|inherit))?(?:\s+((?:normal|bold|bolder|lighter|initial|inherit|\d+)))?(?:\s+(smaller|small|x-small|xx-small|medium|larger|large|x-large|xx-large|initial|inherit|\d+(?:\%|in|cm|mm|em|rem|ex|pt|pc|px))(?:\/(normal|initial|inherit|\d+(?:\%|in|cm|mm|em|rem|ex|pt|pc|px)))?)(?:\s+(initial|inherit|(?:"[^"]*"|'[^']*'|[a-zA-Z-]+)(?:\s*,\s*(?:"[^"]*"|'[^']*'|[a-zA-Z-]+))*))|\s+(caption|icon|menu|message-box|small-caption|status-bar|initial|inherit))/i);
+        longhandVals = decl.match(/\s*(?:(?:(normal|italic|oblique|inherit)\s+)?(?:(normal|small-caps|inherit)\s+)?(?:((?:normal|bold|bolder|lighter|inherit|\d+))\s+)?(?:(smaller|small|x-small|xx-small|medium|larger|large|x-large|xx-large|inherit|\d+(?:\%|in|cm|mm|em|rem|ex|pt|pc|px))(?:\s*\/\s*(normal|inherit|\d+(?:\%|in|cm|mm|em|rem|ex|pt|pc|px)))?\s+)(?:(inherit|(?:"[^"]*"|'[^']*'|[a-zA-Z-]+)(?:\s*,\s*(?:"[^"]*"|'[^']*'|[a-zA-Z-]+))*))|(caption|icon|menu|message-box|small-caption|status-bar|inherit))/i);
         longhandVals.splice(0,1);
+        console.log(longhandVals);
         
         longhandVals.forEach(function (val, i) {
-            shorthandVals += i === 4 && val !== "" ? " / " : "";
-            shorthandVals += val;
-            shorthandVals += i < 6 && longhandVals[i+1] !== "" ? " " : "";
+            shorthandVals += i === 4 && val !== "" ? "/ " : "";
+            shorthandVals += val === undefined ? "" : val;
+            shorthandVals += i < 6 && longhandVals[i+1] !== undefined ? " " : "";
         });
 
         // Return shorthand declaration
