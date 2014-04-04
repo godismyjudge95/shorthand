@@ -123,7 +123,7 @@ define(function (require, exports, module) {
         
         i = 0;
         longhandVals.forEach(function (val) {
-            shorthandVals += i === 2 && val !== "" ? " / " : "";
+            shorthandVals += i === 2 && val !== "" ? "/ " : "";
             shorthandVals += val;
             shorthandVals += i < 7 && longhandVals[i+1] !== "" ? " " : "";
             i++;
