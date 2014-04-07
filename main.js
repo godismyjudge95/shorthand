@@ -40,7 +40,6 @@ define(function (require, exports, module) {
     // Load providers
     require("providers/trbl");
     require("providers/bg");
-    require("providers/font");
 
     /**
      * @private
