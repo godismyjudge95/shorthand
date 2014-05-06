@@ -141,32 +141,6 @@ define(function (require, exports, module) {
         return filtered;
     }
 
-    /**
-     * Convert from one list of properties to another. This can be used to convert:
-     *  - from a single shorthand prop to multiple longhand props
-     *  - from multiple longhand props to a single shorthand prop
-     *
-     * @param {Array<{prop: {string}, val: {string}}>} declList
-     * @param {Array<{string}>} toProps
-     * @return Array<{string}> values that map to toProps array
-     */
-    function convertProps(declList, toProps) {
-        var values = [],
-            $test = $('<div/>');
-
-        // Apply the "from" decls to the jQuery temp element
-        declList.forEach(function (decl) {
-            $test.css(decl.prop, decl.val);
-        });
-
-        // Use the jQuery temp element to get value for each toProp
-        toProps.forEach(function (toProp) {
-            values.push($test.css(toProp));
-        });
-
-        return values;
-    }
-
     // public API
     exports.registerShorthandProvider   = registerShorthandProvider;
     exports.getProviderForProperty      = getProviderForProperty;
@@ -174,7 +148,6 @@ define(function (require, exports, module) {
     // Utility functions
     exports.expandTRBLValues            = expandTRBLValues;
     exports.collapseTRBLValues          = collapseTRBLValues;
-    exports.convertProps                = convertProps;
     exports.findPropInDecList           = findPropInDecList;
     exports.parseDeclarationList        = parseDeclarationList;
     exports.unparseDeclarationList      = unparseDeclarationList;
