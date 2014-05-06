@@ -29,9 +29,6 @@
 define(function (require, exports, module) {
     "use strict";
     
-    var lessParser = new less.Parser();
-
-
     /**
      * Map of registered shorthand providers by css shorthand property name.
      * See {@link #registerShorthandProvider()}.
@@ -85,7 +82,7 @@ define(function (require, exports, module) {
     function findPropInDecList(propName, declList) {
         var i;
         for (i = 0; i < declList.length; i++) {
-            if (declList[i].name === propName) {
+            if (declList[i].prop === propName) {
                 return declList[i];
             }
         }
@@ -93,39 +90,39 @@ define(function (require, exports, module) {
     }
 
     /**
-     * Convert CSS DeclarationList from text to  Object format
-     * @param {string} declListText
-     * @return promise that resolves to {LESS AST}
+     * Convert CSS Declaration from text to  Object format
+     * @param {string} declText
+     * @return {prop: {string}, val: {string}}
      */
-    function parseDeclarationList(declListText) {
-        var result = new $.Deferred();
+    function parseDeclarationList(declText) {
+        var declList = [],
+            regex = /([a-zA-Z\-]+):\s*([^;]*);/,
+            match = declText.match(regex);
 
-        lessParser.parse(declListText, function onParse(err, tree) {
-            if (err) {
-                result.reject(err);
-            } else {
-                result.resolve(tree);
-            }
-        });
+        while (match && match.length === 3) {
+            declList.push({ prop: match[1], val: match[2] });
 
-        return result.promise();
+            declText = declText.substring(match.index + match[0].length);
+            match = declText.match(regex);
+        }
+        
+        return declList;
     }
 
     /**
      * Convert CSS DeclarationList from Object format to text
-     * @param {Array<{prop:{string}, values.values:{Array<{string}}}>} declList
+     * @param {Array<{prop:{string}, val:{string}}>} declList
      * @return {string}
      */
     function unparseDeclarationList(declList) {
         var i, text = "";
-
         declList.forEach(function (decl) {
-            text += decl.name + ": " + decl.value.value[0].value + ";\n";
+            text += decl.prop + ": " + decl.val + ";\n";
         });
 
         return text;
     }
-
+    
     /**
      * Helper function to convert whitespace separated values to an array
      * @param {string} str

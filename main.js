@@ -39,6 +39,7 @@ define(function (require, exports, module) {
 
     // Load providers
     require("providers/trbl");
+    require("providers/bg");
 
     /**
      * @private
@@ -57,13 +58,12 @@ define(function (require, exports, module) {
             shorthandInlineEditor = new InlineShorthandEditor(match),
             code = match[0];
 
-        ShorthandManager.parseDeclarationList(code)
-            .done(function (declList) {
-                shorthandInlineEditor.load(hostEditor, startBookmark, endBookmark, declList);
-                result.resolve(shorthandInlineEditor);
-            });
-        
-        return result.promise();
+        var declList = ShorthandManager.parseDeclarationList(code),
+            decl = (declList.length > 0) ? declList[0] : {};
+
+        shorthandInlineEditor.load(hostEditor, startBookmark, endBookmark, decl);
+
+        return result.resolve(shorthandInlineEditor).promise();
     }
     
     /**
@@ -74,7 +74,7 @@ define(function (require, exports, module) {
      * @return {!RegExpMatch}
      */
     function shorthandMatch(prop, str) {
-        var regex = "(" + prop + ")\\s*:([\\w\\s\\-]+);";
+        var regex = "(" + prop + ")\\s*:([^;]*);";
         return str.match(regex);
     }
     

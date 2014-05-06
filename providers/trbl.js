@@ -54,25 +54,23 @@ define(function (require, exports, module) {
      *
      * If input cannot be converted, then null is returned.
      *
-     * AST format is from LESS parser.
-     *
-     * @ param {name: {string}, value.value[0].value: {Array<{string}>}} decl CSS shorthand declaration
-     * @return {Array<{name:{string}, value.value[0].value:{Array<{string}}}>}
+     * @ param {prop: {string}, val: {string}} decl CSS shorthand declaration
+     * @return {Array<{prop:{string}, val:{string}}>}
      */
     ProviderTRBL.prototype.convertShorthandToLonghand = function (decl) {
-        if (decl.name !== this.propName) {
-            return null;
+        if (decl.prop !== this.propName) {
+            return [];
         }
 
         var longhandVals = ShorthandManager.expandTRBLValues(
-            ShorthandManager.wsvToArray(decl.value.value[0].value)
+            ShorthandManager.wsvToArray(decl.val)
         );
         
         return [
-            { name: this.propName + "-top",    value: { value: [ { value: longhandVals[0] } ] } },
-            { name: this.propName + "-right",  value: { value: [ { value: longhandVals[1] } ] } },
-            { name: this.propName + "-bottom", value: { value: [ { value: longhandVals[2] } ] } },
-            { name: this.propName + "-left",   value: { value: [ { value: longhandVals[3] } ] } }
+            { prop: this.propName + "-top",    val: longhandVals[0] },
+            { prop: this.propName + "-right",  val: longhandVals[1] },
+            { prop: this.propName + "-bottom", val: longhandVals[2] },
+            { prop: this.propName + "-left",   val: longhandVals[3] }
         ];
     };
 
@@ -81,10 +79,8 @@ define(function (require, exports, module) {
      *
      * If input cannot be converted, then null is returned.
      *
-     * AST format is from LESS parser.
-     *
-     * @ param {Array<{name: {string}, value.value[0].value: {string}}>} decl CSS shorthand declaration
-     * @return {name:{string}, value.value[0].value:{string}}
+     * @ param {Array<{prop: {string}, val: {string}}>} decl CSS longhand declarations
+     * @return {prop:{string}, val:{string}}
      */
     ProviderTRBL.prototype.convertLonghandToShorthand = function (declList) {
         var decl,
@@ -98,33 +94,29 @@ define(function (require, exports, module) {
         if (!decl) {
             return null;
         }
-        shorthandVals.push(decl.value.value[0].value);
+        shorthandVals.push(decl.val);
 
         decl = ShorthandManager.findPropInDecList(this.propName + "-right", declList);
         if (!decl) {
             return null;
         }
-        shorthandVals.push(decl.value.value[0].value);
+        shorthandVals.push(decl.val);
 
         decl = ShorthandManager.findPropInDecList(this.propName + "-bottom", declList);
         if (!decl) {
             return null;
         }
-        shorthandVals.push(decl.value.value[0].value);
+        shorthandVals.push(decl.val);
 
         decl = ShorthandManager.findPropInDecList(this.propName + "-left", declList);
         if (!decl) {
             return null;
         }
-        shorthandVals.push(decl.value.value[0].value);
+        shorthandVals.push(decl.val);
 
         return {
-            name: this.propName,
-            value: {
-                value: [
-                    { value: ShorthandManager.collapseTRBLValues(shorthandVals).join(" ") }
-                ]
-            }
+            prop: this.propName,
+            val: ShorthandManager.collapseTRBLValues(shorthandVals).join(" ")
         };
     };
 

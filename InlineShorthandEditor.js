@@ -88,7 +88,7 @@ define(function (require, exports, module) {
      * @override
      * @param {!Editor} hostEditor  Outer Editor instance that inline editor will sit within.
      */
-    InlineShorthandEditor.prototype.load = function (hostEditor, startBookmark, endBookmark, tree) {
+    InlineShorthandEditor.prototype.load = function (hostEditor, startBookmark, endBookmark, decl) {
         InlineShorthandEditor.prototype.parentClass.load.apply(this, arguments);
         
         // FUTURE: when we migrate to CodeMirror v3, we might be able to use markText()
@@ -117,7 +117,7 @@ define(function (require, exports, module) {
         // Convert shorthand declaration to longhand declaration list
         if (this.provider) {
             this.longhandText = ShorthandManager.unparseDeclarationList(
-                this.provider.convertShorthandToLonghand(tree.rules[0])
+                this.provider.convertShorthandToLonghand(decl)
             );
         }
 
@@ -234,20 +234,18 @@ define(function (require, exports, module) {
         if (newText !== this.longhandText && start && end && this.provider) {
             var self = this;
 
-            ShorthandManager.parseDeclarationList(newText)
-                .done(function (declList) {
-                    var shorthandText = ShorthandManager.unparseDeclarationList(
-                        [ self.provider.convertLonghandToShorthand(declList.rules) ]
-                    );
+            var longhandDeclList = ShorthandManager.parseDeclarationList(newText),
+                shorthandDecl = self.provider.convertLonghandToShorthand(longhandDeclList),
+                shorthandDeclList = [ shorthandDecl ],
+                shorthandText = ShorthandManager.unparseDeclarationList(shorthandDeclList);
 
-                    // unparseDeclarationList() generates whole lines, which is great
-                    // for generating longhand for editor, but when replacing original
-                    // text in doc, we need to strip trailing newline because original
-                    // text doesn't have newline.
-                    shorthandText = shorthandText.replace(/\n$/, "");
+            // unparseDeclarationList() generates whole lines, which is great
+            // for generating longhand for editor, but when replacing original
+            // text in doc, we need to strip trailing newline because original
+            // text doesn't have newline.
+            shorthandText = shorthandText.replace(/\n$/, "");
 
-                    self.hostEditor.document.replaceRange(shorthandText, start, end);
-                });
+            self.hostEditor.document.replaceRange(shorthandText, start, end);
         }
 
         this.close();
