@@ -21,6 +21,8 @@ Here you will be able to edit the values of the properties and when you will clo
 
 ## Supported Attributes
 
+Shorthand currently supports the following css attributes:
+
 - margin
 - padding
 - background
