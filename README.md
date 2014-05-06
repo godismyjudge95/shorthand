@@ -21,9 +21,9 @@ Here you will be able to edit the values of the properties and when you will clo
 
 ## Supported Attributes
 
--margin
--padding
--background
+- margin
+- padding
+- background
 
 
 ## Contribute
