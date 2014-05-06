@@ -19,6 +19,11 @@ A Quick Edit panel will be opened, with the same rule expanded in the singular s
    
 Here you will be able to edit the values of the properties and when you will close the Quick Edit, the rules will be condensed back to the short hand.
 
+## Supported Attributes
+
+-margin
+-padding
+-background
 
 
 ## Contribute
