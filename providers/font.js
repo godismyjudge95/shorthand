@@ -42,10 +42,10 @@ define(function (require, exports, module) {
     /**
      * @constructor
      */
-    function ProviderBG() {
+    function ProviderFont() {
     }
     
-    ProviderBG.prototype.propName = "font";
+    ProviderFont.prototype.propName = "font";
 
     /**
      * Converts a CSS shorthand declaration to a longhand declaration list.
@@ -55,7 +55,7 @@ define(function (require, exports, module) {
      * @ param {prop: {string}, val: {string}} decl CSS shorthand declaration
      * @return {Array<{prop:{string}, val:{string}}>}
      */
-    ProviderBG.prototype.convertShorthandToLonghand = function (decl) {
+    ProviderFont.prototype.convertShorthandToLonghand = function (decl) {
         var longhandVals;
         //Get all the various font shorthand values
         originalProps = decl;
@@ -90,7 +90,7 @@ define(function (require, exports, module) {
      * @ param {Array<{prop: {string}, val: {string}}>} decl CSS longhand declarations
      * @return {prop:{string}, val:{string}}
      */
-    ProviderBG.prototype.convertLonghandToShorthand = function (declList) {
+    ProviderFont.prototype.convertLonghandToShorthand = function (declList) {
         var shorthandVals = "", decl = "", longhandVals;
         
         declList.forEach(function(val, i) {
@@ -116,6 +116,6 @@ define(function (require, exports, module) {
     };
 
     // Initialize
-    var provider = new ProviderBG();
+    var provider = new ProviderFont();
     ShorthandManager.registerShorthandProvider("font", provider);
 });
